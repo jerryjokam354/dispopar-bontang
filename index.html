@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bidang Olahraga — Portal Data Realisasi Pengadaan Langsung (DISPOPAR Kota Bontang)</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PapaParse untuk fallback CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: '#0f172a',
+                        accent: '#2563eb',
+                        accentHover: '#1d4ed8',
+                        sportsGreen: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+        .hero-pattern {
+            background-color: #090d16;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.24) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.18) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(30, 58, 138, 0.28) 0px, transparent 50%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        /* Sticky first column for 23-column full mode */
+        .sticky-col-left {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Table Wrapping & Layout Rules */
+        .table-compact-mode {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .table-compact-mode th,
+        .table-compact-mode td {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Print & PDF Export Styles (Hanya Menampilkan Tabel & Kop Resmi) */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 8mm 6mm 8mm 6mm;
+            }
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                font-size: 8pt !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print, nav, header#beranda, footer, #analitik, .hero-pattern {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            #pengadaan {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            #tabel-data {
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
+            .overflow-x-auto {
+                overflow: visible !important;
+                min-height: auto !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 7.5pt !important;
+                page-break-inside: auto !important;
+                table-layout: fixed !important;
+            }
+            thead {
+                display: table-header-group !important;
+            }
+            tfoot {
+                display: table-footer-group !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+            }
+            th, td {
+                border: 1px solid #475569 !important;
+                padding: 3px 4px !important;
+                overflow-wrap: break-word !important;
+                word-break: break-word !important;
+                color: #000000 !important;
+            }
+            th {
+                background-color: #f1f5f9 !important;
+                font-weight: 700 !important;
+                text-align: center !important;
+                color: #000000 !important;
+            }
+            tfoot tr {
+                background-color: #f8fafc !important;
+            }
+            .subtotal-row {
+                display: none !important;
+            }
+            .print-shadow-none {
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .page-break-inside-avoid {
+                page-break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen selection:bg-blue-600 selection:text-white">
+    <div class="bg-slate-950 text-slate-400 text-xs border-b border-slate-800/80 no-print">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-9 flex justify-between items-center">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold shrink-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Pemerintah Kota Bontang
+                </span>
+                <span class="hidden sm:inline text-slate-700">|</span>
+                <span id="topSatkerText" class="hidden sm:inline text-slate-300 truncate">Dinas Pemuda, Olahraga, dan Pariwisata — Bidang Olahraga</span>
+            </div>
+            <div class="flex items-center gap-4 shrink-0">
+                <span id="liveDateDisplay" class="hidden md:inline-flex items-center gap-1.5 text-slate-400">
+                    <i class="fa-regular fa-calendar text-blue-400"></i>
+                    <span>Memuat tanggal...</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="bg-slate-900/95 backdrop-blur-md text-white sticky top-0 z-40 shadow-lg shadow-slate-950/10 border-b border-slate-800/80 no-print">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Brand Identity -->
+                <a href="#beranda" class="flex items-center space-x-3.5 group">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200 ring-1 ring-white/20">
+                        <i class="fa-solid fa-medal text-xl text-white"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg sm:text-xl font-extrabold tracking-tight uppercase text-white">Bidang Olahraga</span>
+                            <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-md">DISPOPAR BONTANG</span>
+                        </div>
+                        <span class="text-xs text-slate-400 tracking-wide block">Portal Transparansi & Data Realisasi Pengadaan Langsung</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-2 lg:space-x-5">
+                    <a href="#beranda" class="px-3 py-2 text-sm text-slate-300 hover:text-white font-semibold transition-colors rounded-lg hover:bg-white/5">Beranda</a>
+                    <a href="#pengadaan" class="px-3 py-2 text-sm text-slate-300 hover:text-white font-semibold transition-colors rounded-lg hover:bg-white/5">Ringkasan Eksekutif</a>
+                    <a href="#analitik" class="px-3 py-2 text-sm text-slate-300 hover:text-white font-semibold transition-colors rounded-lg hover:bg-white/5">Analitik Dana & PDN</a>
+                    <a href="#tabel-data" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white text-sm rounded-xl font-semibold shadow-md shadow-blue-600/25 transition-all flex items-center gap-2 border border-blue-400/20">
+                        <i class="fa-solid fa-table-list"></i>
+                        <span>Tabel Realisasi Pengadaan</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Toggle -->
+                <button id="btnMobileMenu" aria-label="Buka Menu" class="md:hidden w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-lg focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Items -->
+        <div id="mobileMenu" class="hidden md:hidden bg-slate-900 px-4 pt-3 pb-5 space-y-2 border-t border-slate-800 shadow-xl">
+            <a href="#beranda" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-sm">
+                <i class="fa-solid fa-house w-6 text-blue-400"></i> Beranda
+            </a>
+            <a href="#pengadaan" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-sm">
+                <i class="fa-solid fa-chart-pie w-6 text-emerald-400"></i> Ringkasan Eksekutif
+            </a>
+            <a href="#analitik" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-sm">
+                <i class="fa-solid fa-chart-simple w-6 text-amber-400"></i> Analitik Sumber Dana & PDN
+            </a>
+            <a href="#tabel-data" class="mobile-nav-link block px-3 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm text-center shadow-md mt-2">
+                <i class="fa-solid fa-table-list mr-1.5"></i> Lihat Tabel Pengadaan
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header id="beranda" class="relative hero-pattern text-white pt-12 pb-20 lg:pt-16 lg:pb-24 overflow-hidden no-print">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+                
+                <!-- Kolom Teks & Highlight -->
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex flex-wrap items-center justify-center lg:justify-start gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/25 text-blue-300 text-xs font-bold uppercase tracking-wider">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span>Dinas Pemuda, Olahraga, dan Pariwisata Kota Bontang</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight leading-[1.15]">
+                        Wujudkan Prestasi dengan <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-emerald-400">Tata Kelola Pengadaan Terbuka</span>
+                    </h1>
+
+                    <p class="text-slate-300/90 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0 font-normal">
+                        Portal resmi pemantauan paket <strong class="text-white font-semibold">Pencatatan Non Tender / Pengadaan Langsung</strong> pada Bidang Olahraga. Menampilkan rincian Kode RUP, Nilai Kontrak, Capaian PDN &amp; UMK, Pagu, hingga Efisiensi Anggaran secara terbuka dan tersinkronisasi langsung dengan Google Spreadsheet.
+                    </p>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-3.5 pt-2">
+                        <a href="#pengadaan" class="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5">
+                            <span>Lihat Data Realisasi</span>
+                            <i class="fa-solid fa-arrow-down-long"></i>
+                        </a>
+                        <button type="button" onclick="exportToCSV()" class="px-5 py-3.5 rounded-xl glass-card hover:bg-white/10 text-slate-200 font-semibold text-sm flex items-center gap-2.5 transition-all duration-200">
+                            <i class="fa-solid fa-file-csv text-emerald-400 text-base"></i>
+                            <span>Ekspor Data (CSV/Excel)</span>
+                        </button>
+                    </div>
+
+                    <!-- Identitas Satker Info Pill -->
+                    <div class="pt-6 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-2xl mx-auto lg:mx-0 text-left">
+                        <div class="glass-card p-3 rounded-xl flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 shrink-0">
+                                <i class="fa-solid fa-building-flag text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[11px] text-slate-400">Instansi Pemerintah</div>
+                                <div class="text-xs font-bold text-white truncate">Pemkot Bontang</div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
+                                <i class="fa-solid fa-barcode text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[11px] text-slate-400">Kode Satuan Kerja</div>
+                                <div class="text-xs font-bold text-white font-mono truncate">2.19.3.26.0.00.19.0000</div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-3 rounded-xl flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0">
+                                <i class="fa-solid fa-file-signature text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[11px] text-slate-400">Metode Pengadaan</div>
+                                <div class="text-xs font-bold text-white truncate">Pengadaan Langsung</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Foto & Kartu Kepala Bidang -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group w-full max-w-sm">
+                        <div class="absolute -inset-1.5 bg-gradient-to-tr from-blue-600 via-sky-500 to-emerald-500 rounded-[28px] blur-xl opacity-40 group-hover:opacity-70 transition duration-500"></div>
+                        <div class="relative bg-slate-900/95 border border-slate-700/80 rounded-[24px] p-4 shadow-2xl overflow-hidden">
+                            <div class="flex items-center justify-between mb-3 px-1">
+                                <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
+                                    <i class="fa-solid fa-user-tie text-blue-400"></i>
+                                    Pejabat Struktural
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                    Bidang Olahraga
+                                </span>
+                            </div>
+
+                            <div class="h-80 sm:h-96 w-full rounded-2xl bg-gradient-to-t from-slate-950 via-slate-800 to-slate-700 overflow-hidden relative flex items-center justify-center border border-slate-700/60">
+                                <img 
+                                    src="kabid.png" 
+                                    alt="Kepala Bidang Olahraga" 
+                                    onerror="this.onerror=null; this.src='https://placehold.co/500x620/0f172a/38bdf8?text=Foto+Kepala+Bidang%0A(kabid.png)';" 
+                                    class="w-full h-full object-cover object-top transition duration-500 group-hover:scale-105"
+                                >
+                                <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950 via-slate-950/75 to-transparent"></div>
+                                <div class="absolute bottom-3 left-3 right-3 text-left">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-md bg-blue-600/90 backdrop-blur-sm text-[10px] font-bold uppercase tracking-widest text-white mb-1 shadow">
+                                        Kepala Bidang Olahraga
+                                    </span>
+                                    <h3 class="text-lg font-extrabold text-white tracking-tight leading-snug drop-shadow">FITRIYANSYAH, SE</h3>
+                                    <p class="text-[11px] text-slate-300">Dinas Pemuda, Olahraga, dan Pariwisata</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-3.5 pt-3 border-t border-slate-800/90 px-1 text-left">
+                                <p class="text-xs text-slate-300 italic leading-relaxed">
+                                    "Transparansi dan akuntabilitas dalam setiap paket pengadaan sarana, prasarana, serta jasa penunjang olahraga adalah komitmen utama kami dalam mendukung pembangunan kepemudaan dan olahraga Kota Bontang."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION UTAMA: DASHBOARD & TABEL REALISASI -->
+    <main id="pengadaan" class="flex-grow max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        
+        <!-- Print Header Resmi (Hanya tampil saat Cetak / Ekspor PDF) -->
+        <div class="hidden print-only mb-4 border-b-2 border-black pb-2">
+            <div class="text-center">
+                <h1 class="text-sm font-extrabold uppercase tracking-wide text-black m-0 leading-tight">PEMERINTAH KOTA BONTANG</h1>
+                <h2 class="text-xs font-extrabold uppercase text-black m-0 leading-tight">DINAS PEMUDA, OLAHRAGA, DAN PARIWISATA — BIDANG OLAHRAGA</h2>
+                <p class="text-[11px] font-bold text-black mt-1 uppercase tracking-wider">
+                    REKAPITULASI REALISASI PENGADAAN LANGSUNG (PENCATATAN NON TENDER) TAHUN ANGGARAN <span id="printYearLabel">2024</span>
+                </p>
+                <div class="flex justify-between items-center text-[9px] text-gray-700 mt-1.5 pt-1 border-t border-gray-400">
+                    <span>Kode Satker: 2.19.3.26.0.00.19.0000 • Dispopar Kota Bontang</span>
+                    <span>Waktu Cetak: <span id="printTimestamp">-</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Header & Year Selector -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 no-print">
+            <div>
+                <div class="inline-flex items-center gap-2 text-blue-600 font-bold uppercase tracking-wider text-xs">
+                    <span class="w-6 h-0.5 bg-blue-600 rounded-full"></span>
+                    <span>E-Monitoring Pencatatan Non Tender</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1.5 tracking-tight">
+                    Realisasi Pengadaan Langsung Bidang Olahraga
+                </h2>
+                <p id="satkerSubtitle" class="text-slate-600 mt-1 text-xs sm:text-sm font-medium">
+                    DINAS PEMUDA, OLAH RAGA, DAN PARIWISATA - 2.19.3.26.0.00.19.0000 • Pemerintah Kota Bontang
+                </p>
+            </div>
+
+            <!-- Pilihan Tahun Anggaran (Tabs) -->
+            <div class="flex flex-col sm:items-end gap-2">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pilih Sheet Tahun Anggaran:</span>
+                <div class="inline-flex flex-wrap gap-1.5 bg-slate-200/80 p-1.5 rounded-2xl border border-slate-200" id="yearTabsContainer">
+                    <!-- Di-render otomatis oleh JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 5 KARTU KPI EKSEKUTIF (Sesuai Struktur Kolom Google Sheet) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 no-print">
+            <!-- Card 1: Total Paket -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow print-shadow-none">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Paket</span>
+                        <span id="statTotalPaket" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 block tabular-nums">0</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base border border-blue-100 shrink-0">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                </div>
+                <div class="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Paket Selesai:</span>
+                    <span id="statPaketSelesai" class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 tabular-nums">0 Paket</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Total Nilai Realisasi (Kolom "Total Nilai") -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow print-shadow-none">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Nilai Kontrak</span>
+                        <span id="statTotalRealisasi" class="text-lg sm:text-xl font-extrabold text-emerald-600 mt-1.5 block tabular-nums truncate" title="Rp 0">Rp 0</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base border border-emerald-100 shrink-0">
+                        <i class="fa-solid fa-money-bill-trend-up"></i>
+                    </div>
+                </div>
+                <div class="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Terinput Nilai:</span>
+                    <span id="statPaketBernilai" class="font-bold text-slate-700 tabular-nums">0 Paket</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Total Pagu (Kolom "Total Pagu") -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow print-shadow-none">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Pagu Terdata</span>
+                        <span id="statTotalPagu" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1.5 block tabular-nums truncate" title="Rp 0">Rp 0</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base border border-amber-100 shrink-0">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Pagu Terinput:</span>
+                    <span id="statPaketBerpagu" class="font-bold text-amber-700 tabular-nums">0 Paket</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Nilai PDN & UMK (Kolom "Nilai PDN" & "Nilai UMK") -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow print-shadow-none">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Nilai PDN</span>
+                        <span id="statTotalPDN" class="text-lg sm:text-xl font-extrabold text-blue-600 mt-1.5 block tabular-nums truncate" title="Rp 0">Rp 0</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-base border border-sky-100 shrink-0">
+                        <i class="fa-solid fa-industry"></i>
+                    </div>
+                </div>
+                <div class="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Total UMK:</span>
+                    <span id="statTotalUMK" class="font-bold text-sky-700 tabular-nums truncate">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- Card 5: Total Efisiensi (Kolom "Efiensi") -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow print-shadow-none">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Total Efisiensi</span>
+                        <span id="statNominalEfisiensi" class="text-lg sm:text-xl font-extrabold text-purple-600 mt-1.5 block tabular-nums truncate" title="Rp 0">Rp 0</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base border border-purple-100 shrink-0">
+                        <i class="fa-solid fa-piggy-bank"></i>
+                    </div>
+                </div>
+                <div class="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Rasio Efisiensi:</span>
+                    <span id="statEfisiensi" class="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200/60 tabular-nums">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALITIK DISTRIBUSI SUMBER DANA, JENIS PENGADAAN & CAPAIAN PDN/UMK -->
+        <div id="analitik" class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8 no-print">
+            <!-- Panel 1: Proporsi Sumber Dana (APBD vs APBDP) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-landmark text-blue-600"></i> Distribusi Sumber Dana
+                    </span>
+                    <span id="labelSumberDanaTotal" class="text-xs font-semibold text-slate-400">APBD &amp; APBDP</span>
+                </div>
+                <div id="sumberDanaBreakdown" class="space-y-2.5 text-xs">
+                    <!-- Di-render oleh JS -->
+                </div>
+            </div>
+
+            <!-- Panel 2: Distribusi Jenis Pengadaan -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-layer-group text-emerald-600"></i> Kategori Jenis Pengadaan
+                    </span>
+                    <span class="text-xs font-semibold text-slate-400">Berdasarkan Paket</span>
+                </div>
+                <div id="jenisPengadaanBreakdown" class="space-y-2 text-xs">
+                    <!-- Di-render oleh JS -->
+                </div>
+            </div>
+
+            <!-- Panel 3: Rasio PDN & UMK terhadap Total Nilai -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-simple text-purple-600"></i> Komitmen PDN &amp; UMK
+                        </span>
+                        <span class="text-xs font-semibold text-emerald-600">Realisasi Kontrak</span>
+                    </div>
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-semibold text-slate-600">Produk Dalam Negeri (Nilai PDN)</span>
+                                <span id="barPdnText" class="font-bold text-blue-600 tabular-nums">0%</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="barPdnWidth" class="h-full bg-blue-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-semibold text-slate-600">Usaha Mikro Kecil (Nilai UMK)</span>
+                                <span id="barUmkText" class="font-bold text-emerald-600 tabular-nums">0%</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="barUmkWidth" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Program OPD / Pokir:</span>
+                    <span id="statProgramOpd" class="font-bold text-slate-700">Program OPD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABEL & TOOLBAR KONTAINER -->
+        <div id="tabel-data" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden print-shadow-none">
+            
+            <!-- Baris Atas Toolbar: Pencarian & Multi-Filter -->
+            <div class="p-4 sm:p-5 border-b border-slate-200/80 bg-slate-50/70 space-y-4 no-print">
+                <div class="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-3.5">
+                    
+                    <!-- Kiri: Search & Dropdown Filters -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 flex-grow">
+                        <!-- Search Input -->
+                        <div class="relative sm:col-span-2 lg:col-span-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                placeholder="Cari paket, RUP, kode, CV/PT..." 
+                                class="w-full pl-9 pr-8 py-2 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                            >
+                            <button id="clearSearchBtn" type="button" title="Hapus pencarian" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-circle-xmark text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Filter Sumber Dana -->
+                        <div class="relative">
+                            <select id="sumberDanaFilter" aria-label="Filter Sumber Dana" class="w-full pl-3 pr-8 py-2 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm appearance-none cursor-pointer">
+                                <option value="ALL">Semua Sumber Dana</option>
+                                <option value="APBD">Sumber Dana: APBD</option>
+                                <option value="APBDP">Sumber Dana: APBDP</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+                        </div>
+
+                        <!-- Filter Jenis Pengadaan -->
+                        <div class="relative">
+                            <select id="jenisFilter" aria-label="Filter Jenis Pengadaan" class="w-full pl-3 pr-8 py-2 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm appearance-none cursor-pointer">
+                                <option value="ALL">Semua Jenis Pengadaan</option>
+                                <option value="Pekerjaan Konstruksi">Pekerjaan Konstruksi</option>
+                                <option value="Jasa Konsultansi">Jasa Konsultansi</option>
+                                <option value="Jasa Lainnya">Jasa Lainnya</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+                        </div>
+
+                        <!-- Filter Status Paket -->
+                        <div class="relative">
+                            <select id="statusFilter" aria-label="Filter Status Paket" class="w-full pl-3 pr-8 py-2 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm appearance-none cursor-pointer">
+                                <option value="ALL">Semua Status Paket</option>
+                                <option value="PAKET SELESAI">Status: PAKET SELESAI</option>
+                                <option value="BELUM">Status: Proses / Belum Lengkap</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Kanan: Mode Tampilan Kolom & Tombol Aksi -->
+                    <div class="flex flex-wrap items-center justify-between xl:justify-end gap-2 shrink-0">
+                        <!-- Toggle Mode Tampilan: Ringkas vs Lengkap 23 Kolom -->
+                        <div class="inline-flex bg-slate-200/80 p-1 rounded-xl border border-slate-200">
+                            <button type="button" id="btnModeCompact" onclick="setTableViewMode('compact')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-blue-600 shadow-sm">
+                                <i class="fa-solid fa-table-columns mr-1"></i> Tampilan Ringkas
+                            </button>
+                            <button type="button" id="btnModeFull" onclick="setTableViewMode('full')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">
+                                <i class="fa-solid fa-table-cells mr-1"></i> Semua Kolom Sheet (23)
+                            </button>
+                        </div>
+
+                        <!-- Tombol Segarkan -->
+                        <button type="button" onclick="fetchData(activeYear)" title="Sinkronisasi Ulang dari Google Sheet" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-arrows-rotate text-blue-600" id="refreshIcon"></i>
+                            <span class="hidden sm:inline">Sinkronkan</span>
+                        </button>
+
+                        <!-- Tombol Ekspor CSV -->
+                        <button type="button" onclick="exportToCSV()" title="Unduh Semua 23 Kolom ke CSV/Excel" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Ekspor CSV</span>
+                        </button>
+
+                        <!-- Tombol Cetak -->
+                        <button type="button" onclick="window.print()" title="Cetak Laporan" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                            <i class="fa-solid fa-print"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Baris Status Sinkronisasi -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/60 text-xs text-slate-500">
+                    <div class="inline-flex items-center gap-2">
+                        <span id="statusIndicator" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span id="dataStatusText" class="font-semibold text-slate-700">Menghubungkan ke Google Sheet...</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="hidden md:inline text-slate-400">Klik baris paket mana saja untuk melihat rincian lengkap 23 kolom.</span>
+                        <button type="button" onclick="resetAllFilters()" id="btnResetFilter" class="hidden text-blue-600 hover:text-blue-800 font-bold underline">
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontainer Tabel (Mendukung Mode Ringkas & Mode Lengkap 23 Kolom) -->
+            <div class="overflow-x-auto min-h-[360px]">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm" id="mainDataTable">
+                    <thead id="tableHead">
+                        <!-- Di-render dinamis sesuai mode tampilan (Ringkas / Lengkap 23 Kolom) -->
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-slate-700">
+                        <tr>
+                            <td colspan="10" class="py-16 text-center text-slate-400">
+                                <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-blue-600"></i>
+                                <p class="font-semibold text-slate-600">Menarik data langsung dari Google Spreadsheet...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot id="tableFooter" class="bg-slate-100/90 border-t-2 border-slate-300 font-bold text-slate-900 hidden">
+                        <!-- Di-render dinamis sesuai mode tampilan -->
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Navigasi Halaman (Pagination) & Info Bar Bawah Tabel -->
+            <div class="px-4 sm:px-5 py-4 bg-slate-50 border-t border-slate-200/80 flex flex-col lg:flex-row justify-between items-center gap-4 text-xs text-slate-600 no-print">
+                <!-- Kiri: Pilihan Jumlah Baris & Info Rentang Data -->
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                    <div class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-sm">
+                        <span class="text-slate-500 font-medium">Tampilkan:</span>
+                        <select id="rowsPerPageSelect" aria-label="Jumlah baris per halaman" class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer">
+                            <option value="10" selected>10 Baris</option>
+                            <option value="20">20 Baris</option>
+                            <option value="50">50 Baris</option>
+                            <option value="ALL">Semua Baris</option>
+                        </select>
+                    </div>
+                    <div class="text-slate-500">
+                        Menampilkan <strong id="showingRangeText" class="text-slate-800 tabular-nums">0–0</strong> dari <strong id="totalCountText" class="text-slate-800 tabular-nums">0</strong> paket (Tahun <strong id="activeYearFooterText" class="text-slate-800">2024</strong>)
+                    </div>
+                </div>
+
+                <!-- Kanan: Tombol Navigasi Halaman (Prev, 1, 2, 3, Next) -->
+                <div id="paginationControls" class="flex flex-wrap items-center justify-center gap-1.5 select-none">
+                    <!-- Di-render otomatis oleh JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tanda Tangan Resmi (Hanya tampil di bagian paling bawah hasil Cetak / PDF) -->
+        <div class="hidden print-only mt-6 page-break-inside-avoid">
+            <div class="flex justify-between items-end text-xs text-black">
+                <div class="text-[9px] text-gray-600 italic">
+                    * Data bersumber langsung dari Google Spreadsheet E-Monitoring Bidang Olahraga DISPOPAR Bontang.
+                </div>
+                <div class="text-center min-w-[220px]">
+                    <p class="text-[11px]">Bontang, <span id="printDateSignature">-</span></p>
+                    <p class="font-bold text-[11px] mt-0.5">Kepala Bidang Olahraga</p>
+                    <div class="h-14"></div>
+                    <p class="font-bold underline uppercase text-[11px]">FITRIYANSYAH, SE</p>
+                    <p class="text-[10px] text-gray-800">Dinas Pemuda, Olahraga, dan Pariwisata</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL RINCIAN LENGKAP 23 KOLOM PAKET PEKERJAAN -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm no-print">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-base shadow">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Rincian Lengkap Paket Pengadaan (23 Kolom)</h3>
+                        <p id="modalSubtitle" class="text-xs text-slate-400">Kode Paket: - | Kode RUP: -</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-5 text-sm" id="modalBodyContent">
+                <!-- Diisi oleh JS -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200/80 flex justify-between items-center shrink-0">
+                <span class="text-xs text-slate-500">Sumber: Google Spreadsheet Bidang Olahraga</span>
+                <button type="button" onclick="closeDetailModal()" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors">
+                    Tutup Rincian
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PENGATURAN GOOGLE SHEETS -->
+    <div id="sheetModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm no-print">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-table"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Konfigurasi Google Spreadsheet</h3>
+                        <p class="text-[11px] text-slate-400">Tersambung Otomatis ke Sheet Bidang Olahraga</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSheetModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4 text-sm">
+                <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-xs text-emerald-950 space-y-1.5 leading-relaxed">
+                    <div class="font-bold flex items-center gap-1.5 text-emerald-700">
+                        <i class="fa-solid fa-circle-check"></i> Struktur Kolom Sheet yang Didukung (23 Kolom):
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                        <code class="bg-white px-1 rounded border">No</code>, <code class="bg-white px-1 rounded border">Nama Instansi</code>, <code class="bg-white px-1 rounded border">Nama Satuan Kerja</code>, <code class="bg-white px-1 rounded border">Kode Paket</code>, <code class="bg-white px-1 rounded border">Kode RUP</code>, <code class="bg-white px-1 rounded border">Tahun Anggaran</code>, <code class="bg-white px-1 rounded border">Sumber Transaksi</code>, <code class="bg-white px-1 rounded border">Sumber Dana</code>, <code class="bg-white px-1 rounded border">Nama Penyedia</code>, <code class="bg-white px-1 rounded border">Metode Pengadaan</code>, <code class="bg-white px-1 rounded border">Jenis Pengadaan</code>, <code class="bg-white px-1 rounded border">Nama Paket</code>, <code class="bg-white px-1 rounded border">Status Paket</code>, <code class="bg-white px-1 rounded border">Total Nilai</code>, <code class="bg-white px-1 rounded border">Nilai PDN</code>, <code class="bg-white px-1 rounded border">Nilai UMK</code>, <code class="bg-white px-1 rounded border">Total Pagu</code>, <code class="bg-white px-1 rounded border">Efiensi</code>, <code class="bg-white px-1 rounded border">Alamat Penyedia</code>, <code class="bg-white px-1 rounded border">Tanggal Mulai Pekerjaan</code>, <code class="bg-white px-1 rounded border">Tanggal Selesai Pekerjaan</code>, <code class="bg-white px-1 rounded border">Program OPD/Pokir</code>, <code class="bg-white px-1 rounded border">Pengusul (Jika Pokir DPRD)</code>.
+                    </p>
+                </div>
+
+                <div>
+                    <label for="inputSheetId" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                        URL atau ID Google Spreadsheet Aktif
+                    </label>
+                    <input 
+                        type="text" 
+                        id="inputSheetId" 
+                        placeholder="https://docs.google.com/spreadsheets/d/..." 
+                        class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <p class="text-[11px] text-slate-500 mt-1.5">
+                        Default ID: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">1m5kwkPQP0b-7w7Zoaad0CAz3d1QXorkulT1E6DZw_AA</code>
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200/80 flex justify-between items-center">
+                <button type="button" onclick="resetSheetId()" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                    Gunakan Sheet Default
+                </button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeSheetModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-100">
+                        Batal
+                    </button>
+                    <button type="button" onclick="saveSheetId()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm">
+                        Simpan &amp; Muat Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 py-10 border-t border-slate-800/90 text-sm no-print mt-auto">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 pb-8 border-b border-slate-800/80">
+                <div class="flex items-center space-x-3.5 text-center sm:text-left">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center text-white shadow-md shrink-0">
+                        <i class="fa-solid fa-medal"></i>
+                    </div>
+                    <div>
+                        <span class="text-base font-extrabold uppercase text-white tracking-wide block">Bidang Olahraga — DISPOPAR Kota Bontang</span>
+                        <span class="text-xs text-slate-400">Dinas Pemuda, Olahraga, dan Pariwisata Pemerintah Kota Bontang</span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-center gap-6 text-xs font-semibold text-slate-400">
+                    <a href="#beranda" class="hover:text-white transition-colors">Beranda</a>
+                    <a href="#pengadaan" class="hover:text-white transition-colors">Ringkasan KPI</a>
+                    <a href="#tabel-data" class="hover:text-white transition-colors">Tabel Pengadaan</a>
+                </div>
+            </div>
+            <div class="pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+                <p>Hak Cipta &copy; <span id="currentYear"></span> <strong class="text-slate-300">Bidang Olahraga DISPOPAR Kota Bontang</strong>.</p>
+                <p class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-emerald-400"></i>
+                    <span>Sistem Informasi Pengadaan Langsung Bidang Olahraga</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LOGIKA JAVASCRIPT & SINKRONISASI GOOGLE SHEETS (23 KOLOM) -->
+    <script>
+        /**
+         * ============================================================================
+         * KONFIGURASI GOOGLE SPREADSHEET BIDANG OLAHRAGA
+         * Link: https://docs.google.com/spreadsheets/d/1m5kwkPQP0b-7w7Zoaad0CAz3d1QXorkulT1E6DZw_AA/edit?gid=0#gid=0
+         * ============================================================================
+         */
+        const DEFAULT_SPREADSHEET_ID = '1m5kwkPQP0b-7w7Zoaad0CAz3d1QXorkulT1E6DZw_AA';
+        const AVAILABLE_YEARS = ['2024', '2025', '2026'];
+
+        let activeYear = '2024';
+        let tableViewMode = 'compact'; // 'compact' (Ringkas Terstruktur) atau 'full' (Semua 23 Kolom Sheet)
+        let currentData = [];
+        let filteredData = [];
+        let sortState = { column: 'no', asc: true };
+        let currentPage = 1;
+        let rowsPerPage = 10; // Default 10 baris per halaman
+
+        // Ambil Spreadsheet ID aktif
+        function getActiveSpreadsheetId() {
+            const saved = localStorage.getItem('DISPORA_BONTANG_SHEET_ID');
+            if (saved && saved.trim() !== '') return saved.trim();
+            return DEFAULT_SPREADSHEET_ID;
+        }
+
+        // Inisialisasi Tanggal & Tahun
+        function initDateTime() {
+            const now = new Date();
+            document.getElementById('currentYear').textContent = now.getFullYear();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const liveDateEl = document.querySelector('#liveDateDisplay span');
+            if (liveDateEl) liveDateEl.textContent = now.toLocaleDateString('id-ID', options);
+        }
+
+        /**
+         * Parser Angka Nominal dari Google Sheet
+         * Menangani tipe number langsung dari gviz maupun string berformat seperti:
+         * "  18,000,000.00 ", "18,000,000", "18200000", "  4,200,000 ", "0.00", " - "
+         */
+        function parseRupiahNumber(val) {
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            if (val === null || val === undefined) return 0;
+            let str = String(val).trim();
+            if (!str || str === '-' || str === '') return 0;
+
+            str = str.replace(/[^0-9.,-]/g, '');
+            if (!str || str === '-') return 0;
+
+            if (str.includes('.') && str.includes(',')) {
+                if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
+                    // Format titik ribuan, koma desimal: 18.000.000,00
+                    str = str.replace(/\./g, '').replace(',', '.');
+                } else {
+                    // Format koma ribuan, titik desimal: 18,000,000.00
+                    str = str.replace(/,/g, '');
+                }
+            } else if (str.includes(',')) {
+                const parts = str.split(',');
+                if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+                    str = str.replace(/,/g, '');
+                } else {
+                    str = str.replace(',', '.');
+                }
+            } else if (str.includes('.')) {
+                const parts = str.split('.');
+                if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+                    str = str.replace(/\./g, '');
+                }
+            }
+
+            const num = parseFloat(str);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function formatRupiah(val, showDashIfZero = false) {
+            const num = parseRupiahNumber(val);
+            if (num === 0 && showDashIfZero) return '-';
+            return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Render Tombol Tab Tahun Anggaran (2024, 2025, 2026)
+        function renderYearTabs() {
+            const container = document.getElementById('yearTabsContainer');
+            container.innerHTML = '';
+
+            AVAILABLE_YEARS.forEach(year => {
+                const isActive = (year === activeYear);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 ${
+                    isActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                }`;
+                btn.innerHTML = `
+                    <i class="fa-regular fa-calendar-check ${isActive ? 'text-blue-200' : 'text-slate-400'}"></i>
+                    <span>Tahun ${year}</span>
+                `;
+                btn.onclick = () => {
+                    if (activeYear === year) return;
+                    activeYear = year;
+                    renderYearTabs();
+                    fetchData(activeYear);
+                };
+                container.appendChild(btn);
+            });
+
+            document.getElementById('activeYearFooterText').textContent = activeYear;
+            document.getElementById('printYearLabel').textContent = activeYear;
+        }
+
+        /**
+         * Normalisasi Baris Sesuai 23 Kolom Google Sheet:
+         * 0: No
+         * 1: Nama Instansi
+         * 2: Nama Satuan Kerja
+         * 3: Kode Paket
+         * 4: Kode RUP
+         * 5: Tahun Anggaran
+         * 6: Sumber Transaksi
+         * 7: Sumber Dana
+         * 8: Nama Penyedia
+         * 9: Metode Pengadaan
+         * 10: Jenis Pengadaan
+         * 11: Nama Paket
+         * 12: Status Paket
+         * 13: Total Nilai
+         * 14: Nilai PDN
+         * 15: Nilai UMK
+         * 16: Total Pagu
+         * 17: Efiensi
+         * 18: Alamat Penyedia
+         * 19: Tanggal Mulai Pekerjaan
+         * 20: Tanggal Selesai Pekerjaan
+         * 21: Program OPD/Pokir
+         * 22: Pengusul (Jika Pokir DPRD)
+         */
+        function normalizeSheetRow(rawObj, idx) {
+            const getField = (candidates) => {
+                for (let c of candidates) {
+                    const target = c.toLowerCase().replace(/\s+/g, ' ').trim();
+                    for (let k in rawObj) {
+                        const keyNorm = k.toLowerCase().replace(/\s+/g, ' ').trim();
+                        if (keyNorm === target) {
+                            return rawObj[k] ?? '';
+                        }
+                    }
+                }
+                return '';
+            };
+
+            const noRaw = getField(['no', 'nomor']);
+            const instansi = String(getField(['nama instansi', 'instansi'])).trim() || 'Pemerintah Kota Bontang';
+            const satker = String(getField(['nama satuan kerja', 'satuan kerja', 'satker'])).trim();
+            const kodePaket = String(getField(['kode paket'])).replace(/\.0$/, '').trim();
+            const kodeRup = String(getField(['kode rup', 'rup'])).replace(/\.0$/, '').trim();
+            const tahunAnggaran = String(getField(['tahun anggaran', 'tahun'])).replace(/\.0$/, '').trim() || activeYear;
+            const sumberTransaksi = String(getField(['sumber transaksi'])).trim();
+            const sumberDana = String(getField(['sumber dana'])).trim();
+            const penyedia = String(getField(['nama penyedia', 'penyedia', 'pelaksana'])).replace(/\s*\n\s*/g, ' ').trim();
+            const metode = String(getField(['metode pengadaan', 'metode'])).trim();
+            const jenis = String(getField(['jenis pengadaan', 'jenis'])).trim();
+            const paket = String(getField(['nama paket', 'nama paket pekerjaan', 'paket'])).trim();
+            const status = String(getField(['status paket', 'status'])).trim();
+
+            const totalNilaiRaw = getField(['total nilai', 'nilai kontrak', 'realisasi']);
+            const nilaiPdnRaw = getField(['nilai pdn', 'pdn']);
+            const nilaiUmkRaw = getField(['nilai umk', 'umk']);
+            const totalPaguRaw = getField(['total pagu', 'pagu', 'hps']);
+            const efiensiRaw = getField(['efiensi', 'efisiensi']);
+
+            const totalNilai = parseRupiahNumber(totalNilaiRaw);
+            const nilaiPdn = parseRupiahNumber(nilaiPdnRaw);
+            const nilaiUmk = parseRupiahNumber(nilaiUmkRaw);
+            const totalPagu = parseRupiahNumber(totalPaguRaw);
+
+            // Jika kolom Efiensi di sheet terisi angka, gunakan angka tersebut; jika kosong tapi Pagu > Total Nilai, hitung otomatis
+            let efiensi = parseRupiahNumber(efiensiRaw);
+            const hasEfiensiInput = String(efiensiRaw).trim() !== '' && String(efiensiRaw).trim() !== '-';
+            if (!hasEfiensiInput && totalPagu > 0 && totalNilai > 0 && totalPagu >= totalNilai) {
+                efiensi = totalPagu - totalNilai;
+            }
+
+            const alamat = String(getField(['alamat penyedia', 'alamat'])).trim();
+            const tglMulai = String(getField(['tanggal mulai pekerjaan', 'tanggal mulai', 'mulai'])).trim();
+            const tglSelesai = String(getField(['tanggal selesai pekerjaan', 'tanggal selesai', 'selesai'])).trim();
+            const program = String(getField(['program opd/pokir', 'program'])).trim();
+            const pengusul = String(getField(['pengusul (jika pokir dprd)', 'pengusul'])).trim();
+
+            return {
+                no: parseInt(noRaw, 10) || (idx + 1),
+                noDisplay: String(noRaw !== '' ? noRaw : (idx + 1)).replace(/\.0$/, ''),
+                instansi,
+                satker,
+                kodePaket,
+                kodeRup,
+                tahunAnggaran,
+                sumberTransaksi,
+                sumberDana,
+                penyedia,
+                metode,
+                jenis,
+                paket,
+                status,
+                totalNilai,
+                nilaiPdn,
+                nilaiUmk,
+                totalPagu,
+                efiensi,
+                hasPagu: totalPagu > 0,
+                hasNilai: totalNilai > 0,
+                alamat,
+                tglMulai,
+                tglSelesai,
+                program,
+                pengusul
+            };
+        }
+
+        /**
+         * Mengambil Data Langsung dari Google Sheets Menggunakan JSONP (Google Visualization API)
+         * Keunggulan: Bebas blokir CORS baik saat dibuka via file:// lokal maupun web server!
+         */
+        let activeJsonpScript = null;
+
+        function fetchData(year) {
+            const tableBody = document.getElementById('tableBody');
+            const statusText = document.getElementById('dataStatusText');
+            const indicator = document.getElementById('statusIndicator');
+            const refreshIcon = document.getElementById('refreshIcon');
+
+            refreshIcon.classList.add('fa-spin');
+            statusText.textContent = `Menarik data Sheet Tahun ${year}...`;
+            indicator.className = 'inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse';
+
+            renderTableHeader();
+            const colSpan = tableViewMode === 'full' ? 23 : 10;
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="${colSpan}" class="py-16 text-center text-slate-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-blue-600"></i>
+                        <p class="font-semibold text-slate-600">Mengambil data langsung dari Google Sheet (Tab: ${year})...</p>
+                    </td>
+                </tr>
+            `;
+
+            const sheetId = getActiveSpreadsheetId();
+
+            // Gunakan mekanisme JSONP Google Visualization API agar jalan di file:// maupun http://
+            const callbackName = 'gvizCallback_' + Date.now();
+            const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${callbackName}&sheet=${encodeURIComponent(year)}`;
+
+            if (activeJsonpScript) {
+                activeJsonpScript.remove();
+            }
+
+            const timeoutId = setTimeout(() => {
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    fallbackCsvFetch(sheetId, year);
+                }
+            }, 8000);
+
+            window[callbackName] = function(response) {
+                clearTimeout(timeoutId);
+                delete window[callbackName];
+                refreshIcon.classList.remove('fa-spin');
+
+                if (!response || response.status !== 'ok' || !response.table) {
+                    fallbackCsvFetch(sheetId, year);
+                    return;
+                }
+
+                const cols = response.table.cols || [];
+                const rows = response.table.rows || [];
+
+                // Cek apakah sheet kosong (contoh: Sheet 2025 atau 2026 yang belum diisi)
+                if (rows.length === 0) {
+                    currentData = [];
+                    statusText.textContent = `Tersinkronisasi • Sheet Tahun ${year} (Belum Ada Data Paket)`;
+                    indicator.className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-500';
+                    applyFiltersAndRender();
+                    return;
+                }
+
+                // Cek apakah baris pertama berisi judul kolom (jika label di cols kosong)
+                let headers = cols.map(c => (c && c.label ? String(c.label).trim() : ''));
+                let startRowIdx = 0;
+
+                const hasValidLabels = headers.some(h => h.toLowerCase().includes('nama paket') || h.toLowerCase().includes('kode rup'));
+                if (!hasValidLabels && rows.length > 0) {
+                    headers = (rows[0].c || []).map(cell => (cell && (cell.f || cell.v) ? String(cell.f || cell.v).trim() : ''));
+                    startRowIdx = 1;
+                }
+
+                const parsedObjects = [];
+                for (let i = startRowIdx; i < rows.length; i++) {
+                    const rowCells = rows[i].c || [];
+                    const obj = {};
+                    let hasContent = false;
+
+                    for (let cIdx = 0; cIdx < headers.length; cIdx++) {
+                        const headerName = headers[cIdx] || `Col_${cIdx}`;
+                        const cell = rowCells[cIdx];
+                        let val = '';
+                        if (cell !== null && cell !== undefined) {
+                            // Untuk kode paket / RUP atau angka, utamakan nilai asli (v) atau tampilan terformat (f)
+                            if (typeof cell.v === 'number') {
+                                val = cell.v;
+                            } else if (cell.f !== undefined && cell.f !== null) {
+                                val = cell.f;
+                            } else if (cell.v !== undefined && cell.v !== null) {
+                                val = cell.v;
+                            }
+                        }
+                        if (String(val).trim() !== '') hasContent = true;
+                        obj[headerName] = val;
+                    }
+
+                    if (hasContent) {
+                        parsedObjects.push(obj);
+                    }
+                }
+
+                currentData = parsedObjects.map((r, idx) => normalizeSheetRow(r, idx));
+
+                // Update subtitle Satker jika ada di data
+                if (currentData.length > 0 && currentData[0].satker) {
+                    document.getElementById('satkerSubtitle').textContent = `${currentData[0].satker} • ${currentData[0].instansi}`;
+                    document.getElementById('topSatkerText').textContent = `${currentData[0].satker}`;
+                }
+
+                statusText.textContent = `Tersinkronisasi Langsung • Google Sheet (${year})`;
+                indicator.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
+                applyFiltersAndRender();
+            };
+
+            const script = document.createElement('script');
+            script.src = gvizUrl;
+            script.onerror = function() {
+                clearTimeout(timeoutId);
+                delete window[callbackName];
+                fallbackCsvFetch(sheetId, year);
+            };
+            activeJsonpScript = script;
+            document.body.appendChild(script);
+        }
+
+        // Fallback via PapaParse CSV jika JSONP gagal
+        function fallbackCsvFetch(sheetId, year) {
+            const statusText = document.getElementById('dataStatusText');
+            const indicator = document.getElementById('statusIndicator');
+            const refreshIcon = document.getElementById('refreshIcon');
+            const sheetCsvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(year)}`;
+
+            Papa.parse(sheetCsvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    refreshIcon.classList.remove('fa-spin');
+                    const rows = (results && results.data) ? results.data : [];
+                    currentData = rows
+                        .filter(r => Object.values(r).some(v => String(v).trim() !== ''))
+                        .map((r, idx) => normalizeSheetRow(r, idx));
+                    statusText.textContent = `Tersinkronisasi CSV (${year})`;
+                    indicator.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
+                    applyFiltersAndRender();
+                },
+                error: function() {
+                    refreshIcon.classList.remove('fa-spin');
+                    statusText.textContent = `Gagal terhubung ke Google Sheet. Periksa koneksi internet.`;
+                    indicator.className = 'inline-block w-2.5 h-2.5 rounded-full bg-rose-500';
+                    currentData = [];
+                    applyFiltersAndRender();
+                }
+            });
+        }
+
+        // Ubah Mode Tampilan Tabel: 'compact' vs 'full' (23 Kolom)
+        function setTableViewMode(mode) {
+            tableViewMode = mode;
+            const btnCompact = document.getElementById('btnModeCompact');
+            const btnFull = document.getElementById('btnModeFull');
+
+            if (mode === 'compact') {
+                btnCompact.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-blue-600 shadow-sm';
+                btnFull.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
+            } else {
+                btnFull.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-blue-600 shadow-sm';
+                btnCompact.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
+            }
+
+            renderTableHeader();
+            renderTable(filteredData);
+        }
+
+        // Render Header Tabel (Mode Ringkas vs Mode 23 Kolom Lengkap)
+        function renderTableHeader() {
+            const thead = document.getElementById('tableHead');
+            const mainTable = document.getElementById('mainDataTable');
+
+            if (tableViewMode === 'compact') {
+                mainTable.classList.add('table-compact-mode');
+                thead.innerHTML = `
+                    <tr class="bg-slate-100/95 text-slate-700 uppercase text-[11px] font-bold tracking-wider border-b border-slate-300 select-none">
+                        <th class="py-2.5 px-2 w-[3.5%] text-center cursor-pointer hover:text-blue-600" onclick="sortTable('no')">No <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2 w-[10.5%] cursor-pointer hover:text-blue-600" onclick="sortTable('kodeRup')">Kode / RUP <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2.5 w-[25%] cursor-pointer hover:text-blue-600" onclick="sortTable('paket')">Nama Paket &amp; Jenis Pengadaan <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2 w-[8%] text-center cursor-pointer hover:text-blue-600" onclick="sortTable('sumberDana')">Dana &amp; Program</th>
+                        <th class="py-2.5 px-2.5 w-[17%] cursor-pointer hover:text-blue-600" onclick="sortTable('penyedia')">Nama &amp; Alamat Penyedia <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2 w-[11%] text-right cursor-pointer hover:text-blue-600" onclick="sortTable('totalNilai')">Total Nilai / PDN <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2 w-[9%] text-right cursor-pointer hover:text-blue-600" onclick="sortTable('totalPagu')">Total Pagu <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2 w-[6%] text-right cursor-pointer hover:text-blue-600" onclick="sortTable('efiensi')">Efisiensi <i class="fa-solid fa-sort ml-0.5 text-slate-400"></i></th>
+                        <th class="py-2.5 px-2 w-[5%] text-center">Jadwal</th>
+                        <th class="py-2.5 px-2 w-[5%] text-center">Status</th>
+                    </tr>
+                `;
+            } else {
+                mainTable.classList.remove('table-compact-mode');
+                // Semua 23 Kolom Persis Seperti Urutan di Google Sheet
+                thead.innerHTML = `
+                    <tr class="bg-emerald-900 text-white uppercase text-[11px] font-bold tracking-wider border-b border-emerald-950 select-none whitespace-nowrap">
+                        <th class="py-3 px-2 text-center sticky-col-left bg-emerald-900 cursor-pointer" onclick="sortTable('no')">No <i class="fa-solid fa-sort ml-0.5"></i></th>
+                        <th class="py-3 px-3">Nama Instansi</th>
+                        <th class="py-3 px-3">Nama Satuan Kerja</th>
+                        <th class="py-3 px-3 cursor-pointer" onclick="sortTable('kodePaket')">Kode Paket</th>
+                        <th class="py-3 px-3 cursor-pointer" onclick="sortTable('kodeRup')">Kode RUP</th>
+                        <th class="py-3 px-2 text-center">Tahun</th>
+                        <th class="py-3 px-3">Sumber Transaksi</th>
+                        <th class="py-3 px-2 text-center">Sumber Dana</th>
+                        <th class="py-3 px-3 cursor-pointer" onclick="sortTable('penyedia')">Nama Penyedia</th>
+                        <th class="py-3 px-3">Metode Pengadaan</th>
+                        <th class="py-3 px-3">Jenis Pengadaan</th>
+                        <th class="py-3 px-4 min-w-[280px] cursor-pointer" onclick="sortTable('paket')">Nama Paket</th>
+                        <th class="py-3 px-2 text-center">Status</th>
+                        <th class="py-3 px-3 text-right cursor-pointer" onclick="sortTable('totalNilai')">Total Nilai</th>
+                        <th class="py-3 px-3 text-right">Nilai PDN</th>
+                        <th class="py-3 px-3 text-right">Nilai UMK</th>
+                        <th class="py-3 px-3 text-right cursor-pointer" onclick="sortTable('totalPagu')">Total Pagu</th>
+                        <th class="py-3 px-3 text-right cursor-pointer" onclick="sortTable('efiensi')">Efiensi</th>
+                        <th class="py-3 px-4 min-w-[240px]">Alamat Penyedia</th>
+                        <th class="py-3 px-3 text-center">Mulai</th>
+                        <th class="py-3 px-3 text-center">Selesai</th>
+                        <th class="py-3 px-3 text-center">Program OPD/Pokir</th>
+                        <th class="py-3 px-3">Pengusul</th>
+                    </tr>
+                `;
+            }
+        }
+
+        // Terapkan Pencarian, Multi-Filter & Pengurutan
+        function applyFiltersAndRender() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const danaFilter = document.getElementById('sumberDanaFilter').value;
+            const jenisFilter = document.getElementById('jenisFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const clearBtn = document.getElementById('clearSearchBtn');
+            clearBtn.classList.toggle('hidden', query.length === 0);
+
+            const hasActiveFilter = query.length > 0 || danaFilter !== 'ALL' || jenisFilter !== 'ALL' || statusFilter !== 'ALL';
+            document.getElementById('btnResetFilter').classList.toggle('hidden', !hasActiveFilter);
+
+            filteredData = currentData.filter(item => {
+                const matchQuery = !query ||
+                    item.paket.toLowerCase().includes(query) ||
+                    item.penyedia.toLowerCase().includes(query) ||
+                    item.kodePaket.toLowerCase().includes(query) ||
+                    item.kodeRup.toLowerCase().includes(query) ||
+                    item.jenis.toLowerCase().includes(query) ||
+                    item.alamat.toLowerCase().includes(query) ||
+                    item.sumberDana.toLowerCase().includes(query);
+
+                const matchDana = (danaFilter === 'ALL') ||
+                    (item.sumberDana.toUpperCase() === danaFilter.toUpperCase());
+
+                const matchJenis = (jenisFilter === 'ALL') ||
+                    item.jenis.toLowerCase().includes(jenisFilter.toLowerCase());
+
+                let matchStatus = true;
+                if (statusFilter === 'PAKET SELESAI') {
+                    matchStatus = item.status.toUpperCase().includes('SELESAI');
+                } else if (statusFilter === 'BELUM') {
+                    matchStatus = !item.status.toUpperCase().includes('SELESAI');
+                }
+
+                return matchQuery && matchDana && matchJenis && matchStatus;
+            });
+
+            filteredData.sort((a, b) => {
+                let valA = a[sortState.column];
+                let valB = b[sortState.column];
+
+                if (typeof valA === 'string') {
+                    return sortState.asc ? valA.localeCompare(valB, 'id') : valB.localeCompare(valA, 'id');
+                }
+                return sortState.asc ? (valA - valB) : (valB - valA);
+            });
+
+            currentPage = 1;
+            renderTable(filteredData);
+        }
+
+        function resetAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sumberDanaFilter').value = 'ALL';
+            document.getElementById('jenisFilter').value = 'ALL';
+            document.getElementById('statusFilter').value = 'ALL';
+            applyFiltersAndRender();
+        }
+
+        function sortTable(column) {
+            if (sortState.column === column) {
+                sortState.asc = !sortState.asc;
+            } else {
+                sortState.column = column;
+                sortState.asc = true;
+            }
+            applyFiltersAndRender();
+        }
+
+        // Navigasi Pindah Halaman
+        function goToPage(page) {
+            const totalItems = filteredData.length;
+            const totalPages = rowsPerPage === 'ALL' ? 1 : Math.max(1, Math.ceil(totalItems / rowsPerPage));
+            const targetPage = Math.max(1, Math.min(totalPages, page));
+            if (targetPage === currentPage) return;
+            currentPage = targetPage;
+            renderTable(filteredData);
+            // Scroll halus ke atas tabel agar pengguna langsung melihat baris pertama halaman baru
+            const tableEl = document.getElementById('tabel-data');
+            if (tableEl) {
+                tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Render Tombol Navigasi Halaman (Prev, 1, 2, 3, Next)
+        function renderPaginationControls(totalItems, totalPages, startIndex, endIndex) {
+            const rangeEl = document.getElementById('showingRangeText');
+            const totalEl = document.getElementById('totalCountText');
+            const container = document.getElementById('paginationControls');
+
+            totalEl.textContent = totalItems;
+
+            if (totalItems === 0) {
+                rangeEl.textContent = '0';
+                container.innerHTML = '';
+                return;
+            }
+
+            rangeEl.textContent = `${startIndex + 1}–${endIndex}`;
+
+            if (totalPages <= 1) {
+                container.innerHTML = `
+                    <span class="px-3 py-1.5 rounded-xl bg-slate-200/70 text-slate-600 font-semibold text-xs">
+                        Halaman 1 dari 1
+                    </span>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            // Tombol Halaman Pertama & Sebelumnya
+            const prevDisabled = currentPage === 1;
+            html += `
+                <button type="button" onclick="goToPage(1)" ${prevDisabled ? 'disabled' : ''} title="Halaman Pertama"
+                    class="w-8 h-8 rounded-xl border text-xs font-bold flex items-center justify-center transition-all ${
+                        prevDisabled
+                            ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm'
+                    }">
+                    <i class="fa-solid fa-angles-left text-[10px]"></i>
+                </button>
+                <button type="button" onclick="goToPage(${currentPage - 1})" ${prevDisabled ? 'disabled' : ''}
+                    class="px-3 h-8 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
+                        prevDisabled
+                            ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm'
+                    }">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                    <span class="hidden sm:inline">Sebelumnya</span>
+                </button>
+            `;
+
+            // Nomor Halaman (maksimal tampil 5 tombol angka di sekitar halaman aktif)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                const isActive = p === currentPage;
+                html += `
+                    <button type="button" onclick="goToPage(${p})"
+                        class="w-8 h-8 rounded-xl text-xs font-extrabold tabular-nums transition-all ${
+                            isActive
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 border border-blue-600'
+                                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-sm'
+                        }">
+                        ${p}
+                    </button>
+                `;
+            }
+
+            // Tombol Selanjutnya & Halaman Terakhir
+            const nextDisabled = currentPage === totalPages;
+            html += `
+                <button type="button" onclick="goToPage(${currentPage + 1})" ${nextDisabled ? 'disabled' : ''}
+                    class="px-3 h-8 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
+                        nextDisabled
+                            ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm'
+                    }">
+                    <span class="hidden sm:inline">Selanjutnya</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                <button type="button" onclick="goToPage(${totalPages})" ${nextDisabled ? 'disabled' : ''} title="Halaman Terakhir"
+                    class="w-8 h-8 rounded-xl border text-xs font-bold flex items-center justify-center transition-all ${
+                        nextDisabled
+                            ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm'
+                    }">
+                    <i class="fa-solid fa-angles-right text-[10px]"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Render Isi Tabel (Per 10 Baris / Sesuai Pilihan) & Update Semua KPI
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            const tableFooter = document.getElementById('tableFooter');
+            tableBody.innerHTML = '';
+
+            const colSpan = tableViewMode === 'full' ? 23 : 10;
+
+            if (!data || data.length === 0) {
+                tableFooter.classList.add('hidden');
+                renderPaginationControls(0, 1, 0, 0);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="${colSpan}" class="py-16 text-center text-slate-400">
+                            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fa-regular fa-folder-open"></i>
+                            </div>
+                            <p class="font-bold text-slate-700 text-sm">Belum ada data paket pengadaan untuk ditampilkan</p>
+                            <p class="text-xs text-slate-400 mt-1">Pastikan tab tahun anggaran (${activeYear}) pada Google Sheet telah terisi data atau sesuaikan filter pencarian.</p>
+                        </td>
+                    </tr>
+                `;
+                updateDashboardStats([]);
+                return;
+            }
+
+            // Hitung Total Keseluruhan (Semua Baris yang Terfilter)
+            let sumNilaiAll = 0;
+            let sumPdnAll = 0;
+            let sumUmkAll = 0;
+            let sumPaguAll = 0;
+            let sumEfiensiAll = 0;
+
+            data.forEach(item => {
+                sumNilaiAll += item.totalNilai;
+                sumPdnAll += item.nilaiPdn;
+                sumUmkAll += item.nilaiUmk;
+                sumPaguAll += item.totalPagu;
+                sumEfiensiAll += item.efiensi;
+            });
+
+            // Hitung Pagination (Potong Data Sesuai Halaman Aktif)
+            const totalItems = data.length;
+            const totalPages = rowsPerPage === 'ALL' ? 1 : Math.max(1, Math.ceil(totalItems / rowsPerPage));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIndex = rowsPerPage === 'ALL' ? 0 : (currentPage - 1) * rowsPerPage;
+            const endIndex = rowsPerPage === 'ALL' ? totalItems : Math.min(startIndex + rowsPerPage, totalItems);
+            const pageData = data.slice(startIndex, endIndex);
+
+            renderPaginationControls(totalItems, totalPages, startIndex, endIndex);
+
+            // Hitung Subtotal Halaman Aktif
+            let sumNilaiPage = 0;
+            let sumPdnPage = 0;
+            let sumUmkPage = 0;
+            let sumPaguPage = 0;
+            let sumEfiensiPage = 0;
+
+            pageData.forEach((item, idx) => {
+                const realIdx = startIndex + idx; // Indeks asli pada filteredData untuk modal detail
+
+                sumNilaiPage += item.totalNilai;
+                sumPdnPage += item.nilaiPdn;
+                sumUmkPage += item.nilaiUmk;
+                sumPaguPage += item.totalPagu;
+                sumEfiensiPage += item.efiensi;
+
+                const isSelesai = item.status.toUpperCase().includes('SELESAI');
+                const isCompleteRow = item.hasPagu && item.hasNilai;
+
+                const statusBadge = isSelesai
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${escapeHtml(item.status)}
+                       </span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                         <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>${escapeHtml(item.status || 'Belum Lengkap')}
+                       </span>`;
+
+                const danaBadge = item.sumberDana
+                    ? `<span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                        item.sumberDana.toUpperCase() === 'APBDP'
+                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                            : 'bg-blue-50 text-blue-700 border border-blue-200'
+                      }">${escapeHtml(item.sumberDana)}</span>`
+                    : `<span class="text-slate-400">-</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-blue-50/50 transition-colors cursor-pointer group';
+                tr.onclick = (e) => {
+                    if (e.target.closest('button')) return;
+                    openDetailModal(realIdx);
+                };
+
+                if (tableViewMode === 'compact') {
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-2 text-center align-top">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-md ${isCompleteRow ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'} font-bold text-xs tabular-nums">
+                                ${escapeHtml(item.noDisplay)}
+                            </span>
+                        </td>
+                        <td class="py-2.5 px-2 align-top break-words">
+                            <div class="text-xs font-bold font-mono text-slate-800 break-all" title="Kode Paket">${escapeHtml(item.kodePaket || '-')}</div>
+                            <div class="text-[11px] font-mono text-blue-600 mt-0.5 break-all" title="Kode RUP">RUP: ${escapeHtml(item.kodeRup || '-')}</div>
+                        </td>
+                        <td class="py-2.5 px-2.5 align-top break-words">
+                            <div class="font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-snug break-words">
+                                ${escapeHtml(item.paket || '(Nama Paket Belum Diinput)')}
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                                ${item.jenis ? `<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 leading-tight">${escapeHtml(item.jenis)}</span>` : ''}
+                                ${item.metode ? `<span class="text-[10px] text-slate-400">• ${escapeHtml(item.metode)}</span>` : ''}
+                            </div>
+                        </td>
+                        <td class="py-2.5 px-2 text-center align-top break-words">
+                            <div>${danaBadge}</div>
+                            <div class="text-[10px] text-slate-500 mt-1 font-medium break-words leading-tight">${escapeHtml(item.program || '-')}</div>
+                        </td>
+                        <td class="py-2.5 px-2.5 align-top break-words">
+                            <div class="font-bold text-slate-800 text-xs leading-snug break-words">${escapeHtml(item.penyedia || '-')}</div>
+                            ${item.alamat && item.alamat !== '-' ? `<div class="text-[11px] text-slate-500 mt-0.5 break-words leading-tight"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>${escapeHtml(item.alamat)}</div>` : ''}
+                        </td>
+                        <td class="py-2.5 px-2 text-right align-top tabular-nums">
+                            <div class="font-extrabold text-emerald-600 text-xs whitespace-nowrap">${formatRupiah(item.totalNilai, true)}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 whitespace-nowrap">
+                                PDN: <span class="text-slate-600 font-semibold">${formatRupiah(item.nilaiPdn, true)}</span>
+                            </div>
+                        </td>
+                        <td class="py-2.5 px-2 text-right align-top tabular-nums font-semibold text-slate-700 text-xs whitespace-nowrap">
+                            ${formatRupiah(item.totalPagu, true)}
+                        </td>
+                        <td class="py-2.5 px-2 text-right align-top tabular-nums">
+                            ${item.efiensi > 0
+                                ? `<span class="inline-block px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-bold text-xs whitespace-nowrap">${formatRupiah(item.efiensi)}</span>`
+                                : `<span class="text-slate-400 text-xs">-</span>`
+                            }
+                        </td>
+                        <td class="py-2.5 px-2 text-center align-top text-[11px] text-slate-600">
+                            ${item.tglMulai || item.tglSelesai
+                                ? `<div class="font-medium whitespace-nowrap">${escapeHtml(item.tglMulai || '?')}</div>
+                                   <div class="text-[10px] text-slate-400 whitespace-nowrap">s/d ${escapeHtml(item.tglSelesai || '?')}</div>`
+                                : `<span class="text-slate-400">-</span>`
+                            }
+                        </td>
+                        <td class="py-2.5 px-2 text-center align-top">
+                            ${statusBadge}
+                        </td>
+                    `;
+                } else {
+                    // Mode Lengkap 23 Kolom Persis Seperti Spreadsheet
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 text-center font-bold sticky-col-left bg-white group-hover:bg-blue-50 border-r border-slate-200 tabular-nums">${escapeHtml(item.noDisplay)}</td>
+                        <td class="py-3 px-3 whitespace-nowrap text-xs">${escapeHtml(item.instansi)}</td>
+                        <td class="py-3 px-3 whitespace-nowrap text-xs">${escapeHtml(item.satker)}</td>
+                        <td class="py-3 px-3 whitespace-nowrap font-mono text-xs">${escapeHtml(item.kodePaket || '-')}</td>
+                        <td class="py-3 px-3 whitespace-nowrap font-mono text-xs text-blue-600 font-semibold">${escapeHtml(item.kodeRup || '-')}</td>
+                        <td class="py-3 px-3 text-center whitespace-nowrap text-xs">${escapeHtml(item.tahunAnggaran)}</td>
+                        <td class="py-3 px-3 whitespace-nowrap text-xs">${escapeHtml(item.sumberTransaksi || '-')}</td>
+                        <td class="py-3 px-3 text-center whitespace-nowrap">${danaBadge}</td>
+                        <td class="py-3 px-3 whitespace-nowrap font-semibold text-xs text-slate-800">${escapeHtml(item.penyedia || '-')}</td>
+                        <td class="py-3 px-3 whitespace-nowrap text-xs">${escapeHtml(item.metode || '-')}</td>
+                        <td class="py-3 px-3 whitespace-nowrap text-xs">${escapeHtml(item.jenis || '-')}</td>
+                        <td class="py-3 px-4 font-bold text-slate-900 text-xs min-w-[280px]">${escapeHtml(item.paket || '-')}</td>
+                        <td class="py-3 px-3 text-center whitespace-nowrap">${statusBadge}</td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap font-bold text-emerald-700 tabular-nums text-xs">${formatRupiah(item.totalNilai, true)}</td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap tabular-nums text-xs">${formatRupiah(item.nilaiPdn, true)}</td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap tabular-nums text-xs">${formatRupiah(item.nilaiUmk, true)}</td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap font-semibold text-slate-800 tabular-nums text-xs">${formatRupiah(item.totalPagu, true)}</td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap font-bold text-purple-700 tabular-nums text-xs">${formatRupiah(item.efiensi, true)}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600 min-w-[240px]">${escapeHtml(item.alamat || '-')}</td>
+                        <td class="py-3 px-3 text-center whitespace-nowrap text-xs">${escapeHtml(item.tglMulai || '-')}</td>
+                        <td class="py-3 px-3 text-center whitespace-nowrap text-xs">${escapeHtml(item.tglSelesai || '-')}</td>
+                        <td class="py-3 px-3 text-center whitespace-nowrap text-xs">${escapeHtml(item.program || '-')}</td>
+                        <td class="py-3 px-3 whitespace-nowrap text-xs">${escapeHtml(item.pengusul || '-')}</td>
+                    `;
+                }
+
+                tableBody.appendChild(tr);
+            });
+
+            // Render Footer Total Rekapitulasi (Subtotal Halaman & Total Keseluruhan)
+            tableFooter.classList.remove('hidden');
+            if (tableViewMode === 'compact') {
+                const subtotalRow = totalPages > 1 ? `
+                    <tr class="subtotal-row border-b border-slate-200/80 bg-slate-50 text-slate-600 font-semibold">
+                        <td colspan="5" class="py-2.5 px-4 text-right uppercase text-[11px] tracking-wider">
+                            Subtotal Halaman ${currentPage} (${pageData.length} Paket):
+                        </td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-emerald-600 text-xs">${formatRupiah(sumNilaiPage)}</td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-slate-700 text-xs">${formatRupiah(sumPaguPage)}</td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-purple-600 text-xs">${formatRupiah(sumEfiensiPage)}</td>
+                        <td colspan="2" class="py-2.5 px-3"></td>
+                    </tr>
+                ` : '';
+
+                tableFooter.innerHTML = `
+                    ${subtotalRow}
+                    <tr>
+                        <td colspan="5" class="py-3.5 px-4 text-right uppercase text-xs tracking-wider text-slate-700">
+                            Total Keseluruhan (${data.length} Paket):
+                        </td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-emerald-700 text-xs sm:text-sm">${formatRupiah(sumNilaiAll)}</td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-slate-900 text-xs sm:text-sm">${formatRupiah(sumPaguAll)}</td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-purple-700 text-xs sm:text-sm">${formatRupiah(sumEfiensiAll)}</td>
+                        <td colspan="2" class="py-3.5 px-3"></td>
+                    </tr>
+                `;
+            } else {
+                const subtotalRow = totalPages > 1 ? `
+                    <tr class="whitespace-nowrap text-xs border-b border-slate-200/80 bg-slate-50 font-semibold text-slate-600">
+                        <td colspan="13" class="py-2.5 px-4 text-right uppercase tracking-wider">
+                            Subtotal Halaman ${currentPage} (${pageData.length} Paket):
+                        </td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-emerald-600">${formatRupiah(sumNilaiPage)}</td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-blue-600">${formatRupiah(sumPdnPage)}</td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-sky-600">${formatRupiah(sumUmkPage)}</td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-slate-700">${formatRupiah(sumPaguPage)}</td>
+                        <td class="py-2.5 px-3 text-right tabular-nums text-purple-600">${formatRupiah(sumEfiensiPage)}</td>
+                        <td colspan="5"></td>
+                    </tr>
+                ` : '';
+
+                tableFooter.innerHTML = `
+                    ${subtotalRow}
+                    <tr class="whitespace-nowrap text-xs">
+                        <td colspan="13" class="py-3.5 px-4 text-right uppercase tracking-wider text-slate-700">
+                            Total Keseluruhan (${data.length} Paket):
+                        </td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-emerald-700">${formatRupiah(sumNilaiAll)}</td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-blue-700">${formatRupiah(sumPdnAll)}</td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-sky-700">${formatRupiah(sumUmkAll)}</td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-slate-900">${formatRupiah(sumPaguAll)}</td>
+                        <td class="py-3.5 px-3 text-right tabular-nums text-purple-700">${formatRupiah(sumEfiensiAll)}</td>
+                        <td colspan="5"></td>
+                    </tr>
+                `;
+            }
+
+            updateDashboardStats(data);
+        }
+
+        // Update 5 Kartu KPI & 3 Panel Analitik
+        function updateDashboardStats(data) {
+            const totalPaket = data.length;
+            let paketSelesai = 0;
+            let paketBernilai = 0;
+            let paketBerpagu = 0;
+
+            let sumNilai = 0;
+            let sumPdn = 0;
+            let sumUmk = 0;
+            let sumPagu = 0;
+            let sumEfiensi = 0;
+
+            const danaMap = {};
+            const jenisMap = {};
+            let opdCount = 0;
+            let pokirCount = 0;
+
+            data.forEach(item => {
+                if (item.status.toUpperCase().includes('SELESAI')) paketSelesai++;
+                if (item.totalNilai > 0) paketBernilai++;
+                if (item.totalPagu > 0) paketBerpagu++;
+
+                sumNilai += item.totalNilai;
+                sumPdn += item.nilaiPdn;
+                sumUmk += item.nilaiUmk;
+                sumPagu += item.totalPagu;
+                sumEfiensi += item.efiensi;
+
+                const danaKey = item.sumberDana || 'Belum Diisi';
+                if (!danaMap[danaKey]) danaMap[danaKey] = { count: 0, nilai: 0 };
+                danaMap[danaKey].count++;
+                danaMap[danaKey].nilai += item.totalNilai;
+
+                const jenisKey = item.jenis || 'Belum Diisi';
+                if (!jenisMap[jenisKey]) jenisMap[jenisKey] = { count: 0, nilai: 0 };
+                jenisMap[jenisKey].count++;
+                jenisMap[jenisKey].nilai += item.totalNilai;
+
+                if (item.program.toLowerCase().includes('pokir')) pokirCount++;
+                else if (item.program) opdCount++;
+            });
+
+            document.getElementById('statTotalPaket').textContent = totalPaket;
+            document.getElementById('statPaketSelesai').textContent = `${paketSelesai} Selesai`;
+
+            document.getElementById('statTotalRealisasi').textContent = formatRupiah(sumNilai);
+            document.getElementById('statTotalRealisasi').title = formatRupiah(sumNilai);
+            document.getElementById('statPaketBernilai').textContent = `${paketBernilai} dari ${totalPaket} Paket`;
+
+            document.getElementById('statTotalPagu').textContent = formatRupiah(sumPagu);
+            document.getElementById('statTotalPagu').title = formatRupiah(sumPagu);
+            document.getElementById('statPaketBerpagu').textContent = `${paketBerpagu} Paket`;
+
+            document.getElementById('statTotalPDN').textContent = formatRupiah(sumPdn);
+            document.getElementById('statTotalPDN').title = formatRupiah(sumPdn);
+            document.getElementById('statTotalUMK').textContent = formatRupiah(sumUmk);
+
+            document.getElementById('statNominalEfisiensi').textContent = formatRupiah(sumEfiensi);
+            document.getElementById('statNominalEfisiensi').title = formatRupiah(sumEfiensi);
+
+            const efisiensiPct = sumPagu > 0 ? ((sumEfiensi / sumPagu) * 100).toFixed(2) : '0';
+            document.getElementById('statEfisiensi').textContent = `${efisiensiPct}% dari Pagu`;
+
+            // Panel 1: Sumber Dana Breakdown
+            const danaContainer = document.getElementById('sumberDanaBreakdown');
+            const danaEntries = Object.entries(danaMap).sort((a, b) => b[1].nilai - a[1].nilai);
+            if (danaEntries.length === 0) {
+                danaContainer.innerHTML = `<p class="text-slate-400">Tidak ada data</p>`;
+            } else {
+                danaContainer.innerHTML = danaEntries.map(([key, info]) => {
+                    const pct = totalPaket > 0 ? Math.round((info.count / totalPaket) * 100) : 0;
+                    const barColor = key.toUpperCase() === 'APBDP' ? 'bg-purple-500' : 'bg-blue-600';
+                    return `
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-slate-700">${escapeHtml(key)} <span class="text-slate-400 font-normal">(${info.count} Paket)</span></span>
+                                <span class="font-bold text-slate-800 tabular-nums">${formatRupiah(info.nilai)}</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full ${barColor} rounded-full" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Panel 2: Jenis Pengadaan Breakdown
+            const jenisContainer = document.getElementById('jenisPengadaanBreakdown');
+            const jenisEntries = Object.entries(jenisMap).sort((a, b) => b[1].count - a[1].count);
+            if (jenisEntries.length === 0) {
+                jenisContainer.innerHTML = `<p class="text-slate-400">Tidak ada data</p>`;
+            } else {
+                jenisContainer.innerHTML = jenisEntries.map(([key, info]) => `
+                    <div class="flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
+                        <span class="text-slate-700 font-medium truncate pr-2" title="${escapeHtml(key)}">${escapeHtml(key)}</span>
+                        <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold tabular-nums shrink-0">${info.count} Paket</span>
+                    </div>
+                `).join('');
+            }
+
+            // Panel 3: PDN & UMK
+            const pdnPct = sumNilai > 0 ? Math.min(100, (sumPdn / sumNilai) * 100) : 0;
+            const umkPct = sumNilai > 0 ? Math.min(100, (sumUmk / sumNilai) * 100) : 0;
+            document.getElementById('barPdnText').textContent = `${pdnPct.toFixed(1)}% (${formatRupiah(sumPdn)})`;
+            document.getElementById('barPdnWidth').style.width = `${pdnPct}%`;
+            document.getElementById('barUmkText').textContent = `${umkPct.toFixed(1)}% (${formatRupiah(sumUmk)})`;
+            document.getElementById('barUmkWidth').style.width = `${umkPct}%`;
+            document.getElementById('statProgramOpd').textContent = `${opdCount} Program OPD • ${pokirCount} Pokir`;
+        }
+
+        // Modal Rincian Lengkap 23 Kolom
+        function openDetailModal(index) {
+            const item = filteredData[index];
+            if (!item) return;
+
+            document.getElementById('modalSubtitle').textContent = `No. Urut ${item.noDisplay} • Kode Paket: ${item.kodePaket || '-'} • Kode RUP: ${item.kodeRup || '-'}`;
+
+            const body = document.getElementById('modalBodyContent');
+            body.innerHTML = `
+                <!-- Nama Paket & Status -->
+                <div class="p-4 rounded-2xl bg-slate-900 text-white">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs font-bold">
+                            ${escapeHtml(item.jenis || 'Jenis Pengadaan Belum Diisi')}
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${item.status.toUpperCase().includes('SELESAI') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-amber-500/20 text-amber-300 border border-amber-400/30'}">
+                            ${escapeHtml(item.status || 'Proses / Belum Lengkap')}
+                        </span>
+                    </div>
+                    <h4 class="text-base sm:text-lg font-extrabold leading-snug">${escapeHtml(item.paket || '-')}</h4>
+                    <p class="text-xs text-slate-400 mt-1">${escapeHtml(item.satker)} — ${escapeHtml(item.instansi)}</p>
+                </div>
+
+                <!-- Ringkasan 5 Nilai Anggaran -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                        <span class="text-[11px] font-bold uppercase text-emerald-700 block">Total Nilai (Kontrak)</span>
+                        <span class="text-base font-extrabold text-emerald-800 tabular-nums mt-0.5 block">${formatRupiah(item.totalNilai, true)}</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <span class="text-[11px] font-bold uppercase text-slate-500 block">Total Pagu</span>
+                        <span class="text-base font-extrabold text-slate-900 tabular-nums mt-0.5 block">${formatRupiah(item.totalPagu, true)}</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 col-span-2 sm:col-span-1">
+                        <span class="text-[11px] font-bold uppercase text-purple-700 block">Efisiensi (Hemat)</span>
+                        <span class="text-base font-extrabold text-purple-800 tabular-nums mt-0.5 block">${formatRupiah(item.efiensi, true)}</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-200/80">
+                        <span class="text-[11px] text-slate-500 block">Nilai PDN</span>
+                        <span class="text-sm font-bold text-blue-700 tabular-nums">${formatRupiah(item.nilaiPdn, true)}</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-sky-50/60 border border-sky-200/80 col-span-1 sm:col-span-2">
+                        <span class="text-[11px] text-slate-500 block">Nilai UMK</span>
+                        <span class="text-sm font-bold text-sky-700 tabular-nums">${formatRupiah(item.nilaiUmk, true)}</span>
+                    </div>
+                </div>
+
+                <!-- Tabel Rincian Seluruh Atribut Kolom Sheet -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                    <div class="bg-slate-100 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
+                        Rincian Atribut Lengkap Sesuai Kolom Google Sheet
+                    </div>
+                    <div class="divide-y divide-slate-100 text-xs">
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">1. No Urut</span><span class="col-span-2 font-bold text-slate-800">${escapeHtml(item.noDisplay)}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">2. Nama Instansi</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.instansi || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">3. Nama Satuan Kerja</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.satker || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">4. Kode Paket</span><span class="col-span-2 font-mono font-bold text-slate-800">${escapeHtml(item.kodePaket || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">5. Kode RUP</span><span class="col-span-2 font-mono font-bold text-blue-600">${escapeHtml(item.kodeRup || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">6. Tahun Anggaran</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.tahunAnggaran || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">7. Sumber Transaksi</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.sumberTransaksi || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">8. Sumber Dana</span><span class="col-span-2 font-bold text-blue-700">${escapeHtml(item.sumberDana || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">9. Nama Penyedia</span><span class="col-span-2 font-bold text-slate-900">${escapeHtml(item.penyedia || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">10. Alamat Penyedia</span><span class="col-span-2 text-slate-700">${escapeHtml(item.alamat || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">11. Metode Pengadaan</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.metode || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">12. Jenis Pengadaan</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.jenis || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">13. Tanggal Mulai Pekerjaan</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.tglMulai || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">14. Tanggal Selesai Pekerjaan</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.tglSelesai || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">15. Program OPD/Pokir</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.program || '-')}</span></div>
+                        <div class="grid grid-cols-3 px-4 py-2.5"><span class="text-slate-500 font-medium">16. Pengusul (Jika Pokir DPRD)</span><span class="col-span-2 font-semibold text-slate-800">${escapeHtml(item.pengusul || '-')}</span></div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Modal Pengaturan Google Sheet
+        function openSheetModal() {
+            document.getElementById('inputSheetId').value = getActiveSpreadsheetId();
+            const modal = document.getElementById('sheetModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSheetModal() {
+            const modal = document.getElementById('sheetModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveSheetId() {
+            let rawInput = document.getElementById('inputSheetId').value.trim();
+            const match = rawInput.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            const extractedId = match ? match[1] : rawInput;
+
+            if (extractedId) {
+                localStorage.setItem('DISPORA_BONTANG_SHEET_ID', extractedId);
+            } else {
+                localStorage.removeItem('DISPORA_BONTANG_SHEET_ID');
+            }
+            closeSheetModal();
+            fetchData(activeYear);
+        }
+
+        function resetSheetId() {
+            localStorage.removeItem('DISPORA_BONTANG_SHEET_ID');
+            document.getElementById('inputSheetId').value = DEFAULT_SPREADSHEET_ID;
+            closeSheetModal();
+            fetchData(activeYear);
+        }
+
+        // Ekspor Semua 23 Kolom ke CSV/Excel
+        function exportToCSV() {
+            if (!filteredData || filteredData.length === 0) {
+                alert('Tidak ada data untuk diekspor.');
+                return;
+            }
+
+            const headers = [
+                'No', 'Nama Instansi', 'Nama Satuan Kerja', 'Kode Paket', 'Kode RUP',
+                'Tahun Anggaran', 'Sumber Transaksi', 'Sumber Dana', 'Nama Penyedia',
+                'Metode Pengadaan', 'Jenis Pengadaan', 'Nama Paket', 'Status Paket',
+                'Total Nilai', 'Nilai PDN', 'Nilai UMK', 'Total Pagu', 'Efiensi',
+                'Alamat Penyedia', 'Tanggal Mulai Pekerjaan', 'Tanggal Selesai Pekerjaan',
+                'Program OPD/Pokir', 'Pengusul (Jika Pokir DPRD)'
+            ];
+
+            const q = (str) => `"${String(str ?? '').replace(/"/g, '""')}"`;
+
+            const rows = filteredData.map(item => [
+                item.noDisplay,
+                q(item.instansi),
+                q(item.satker),
+                q(item.kodePaket),
+                q(item.kodeRup),
+                item.tahunAnggaran,
+                q(item.sumberTransaksi),
+                q(item.sumberDana),
+                q(item.penyedia),
+                q(item.metode),
+                q(item.jenis),
+                q(item.paket),
+                q(item.status),
+                item.totalNilai,
+                item.nilaiPdn,
+                item.nilaiUmk,
+                item.totalPagu,
+                item.efiensi,
+                q(item.alamat),
+                q(item.tglMulai),
+                q(item.tglSelesai),
+                q(item.program),
+                q(item.pengusul)
+            ]);
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Data_Pengadaan_Bidang_Olahraga_Bontang_TA_${activeYear}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Event Listeners
+        document.getElementById('searchInput').addEventListener('input', applyFiltersAndRender);
+        document.getElementById('sumberDanaFilter').addEventListener('change', applyFiltersAndRender);
+        document.getElementById('jenisFilter').addEventListener('change', applyFiltersAndRender);
+        document.getElementById('statusFilter').addEventListener('change', applyFiltersAndRender);
+        document.getElementById('rowsPerPageSelect').addEventListener('change', (e) => {
+            const val = e.target.value;
+            rowsPerPage = val === 'ALL' ? 'ALL' : parseInt(val, 10);
+            currentPage = 1;
+            renderTable(filteredData);
+        });
+        document.getElementById('clearSearchBtn').addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            applyFiltersAndRender();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDetailModal();
+                closeSheetModal();
+            }
+        });
+
+        // Sinkronisasi Cetak & Export PDF: Tampilkan Seluruh Data Tabel Secara Bersih
+        let savedRowsPerPage = null;
+        let savedCurrentPage = null;
+
+        window.addEventListener('beforeprint', () => {
+            savedRowsPerPage = rowsPerPage;
+            savedCurrentPage = currentPage;
+            rowsPerPage = 'ALL';
+            currentPage = 1;
+            renderTable(filteredData);
+
+            const now = new Date();
+            const timeStr = now.toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+            const printTimestampEl = document.getElementById('printTimestamp');
+            if (printTimestampEl) printTimestampEl.textContent = timeStr;
+            const printYearEl = document.getElementById('printYearLabel');
+            if (printYearEl) printYearEl.textContent = activeYear;
+            const printDateSigEl = document.getElementById('printDateSignature');
+            if (printDateSigEl) printDateSigEl.textContent = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        });
+
+        window.addEventListener('afterprint', () => {
+            if (savedRowsPerPage !== null) {
+                rowsPerPage = savedRowsPerPage;
+                currentPage = savedCurrentPage || 1;
+                renderTable(filteredData);
+            }
+        });
+
+        const btnMobileMenu = document.getElementById('btnMobileMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        btnMobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // Jalankan Saat Halaman Dibuka
+        initDateTime();
+        renderYearTabs();
+        fetchData(activeYear);
+    </script>
+</body>
+</html>
